@@ -5,7 +5,7 @@ import { supabase } from '../lib/supabaseClient';
 import './auth.css';
 
 const SignUp = ({ setUser }) => {
-  const [activeTab, setActiveTab] = useState('student'); // 'student' or 'staff'
+  const [activeTab, setActiveTab] = useState('student'); // 'student' | 'staff'
   const [formData, setFormData] = useState({
     fullName: '',
     studentId: '',
@@ -23,18 +23,10 @@ const SignUp = ({ setUser }) => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-    
-    // Clear specific error when user starts typing
-    if (errors[name]) {
-      setErrors(prev => ({
-        ...prev,
-        [name]: ''
-      }));
-    }
+    setFormData(prev => ({ ...prev, [name]: value }));
+
+    // clear field-specific error while typing
+    if (errors[name]) setErrors(prev => ({ ...prev, [name]: '' }));
   };
 
   const handleBlur = (e) => {
@@ -47,75 +39,52 @@ const SignUp = ({ setUser }) => {
 
     switch (fieldName) {
       case 'fullName':
-        if (!value) {
-          newErrors.fullName = 'Full name is required';
-        } else {
-          delete newErrors.fullName;
-        }
+        if (!value) newErrors.fullName = 'Full name is required';
+        else delete newErrors.fullName;
         break;
 
       case 'studentId':
-        if (activeTab === 'student' && !value) {
-          newErrors.studentId = 'Student ID is required';
-        } else {
-          delete newErrors.studentId;
-        }
+        if (activeTab === 'student' && !value) newErrors.studentId = 'Student ID is required';
+        else delete newErrors.studentId;
         break;
 
       case 'staffId':
-        if (activeTab === 'staff' && !value) {
-          newErrors.staffId = 'Staff ID is required';
-        } else {
-          delete newErrors.staffId;
-        }
+        if (activeTab === 'staff' && !value) newErrors.staffId = 'Staff ID is required';
+        else delete newErrors.staffId;
         break;
 
       case 'email':
-        if (!value) {
-          newErrors.email = 'Email is required';
-        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+        if (!value) newErrors.email = 'Email is required';
+        else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value))
           newErrors.email = 'Please enter a valid institutional email address';
-        } else if (!value.endsWith('@cit.edu')) {
+        else if (!value.endsWith('@cit.edu'))
           newErrors.email = 'Please use your CIT institutional email (@cit.edu)';
-        } else {
-          delete newErrors.email;
-        }
+        else delete newErrors.email;
         break;
 
       case 'phoneNumber':
-        if (!value) {
-          newErrors.phoneNumber = 'Phone number is required';
-        } else {
-          delete newErrors.phoneNumber;
-        }
+        if (!value) newErrors.phoneNumber = 'Phone number is required';
+        else delete newErrors.phoneNumber;
         break;
 
       case 'address':
-        if (!value) {
-          newErrors.address = 'Address is required';
-        } else {
-          delete newErrors.address;
-        }
+        if (!value) newErrors.address = 'Address is required';
+        else delete newErrors.address;
         break;
 
       case 'password':
-        if (!value) {
-          newErrors.password = 'Password is required';
-        } else if (value.length < 6) {
-          newErrors.password = 'Password must be at least 6 characters';
-        } else {
-          delete newErrors.password;
-        }
+        if (!value) newErrors.password = 'Password is required';
+        else if (value.length < 6) newErrors.password = 'Password must be at least 6 characters';
+        else delete newErrors.password;
         break;
 
       case 'confirmPassword':
-        if (!value) {
-          newErrors.confirmPassword = 'Please confirm your password';
-        } else if (formData.password !== value) {
-          newErrors.confirmPassword = 'Passwords do not match';
-        } else {
-          delete newErrors.confirmPassword;
-        }
+        if (!value) newErrors.confirmPassword = 'Please confirm your password';
+        else if (formData.password !== value) newErrors.confirmPassword = 'Passwords do not match';
+        else delete newErrors.confirmPassword;
+        break;
+
+      default:
         break;
     }
 
@@ -125,39 +94,31 @@ const SignUp = ({ setUser }) => {
   const validateForm = () => {
     const newErrors = {};
 
-    // Validate all fields
     if (!formData.fullName.trim()) newErrors.fullName = 'Full name is required';
-    
-    if (activeTab === 'student' && !formData.studentId.trim()) {
-      newErrors.studentId = 'Student ID is required';
-    }
-    
-    if (activeTab === 'staff' && !formData.staffId.trim()) {
-      newErrors.staffId = 'Staff ID is required';
-    }
 
-    if (!formData.email.trim()) {
-      newErrors.email = 'Email is required';
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+    if (activeTab === 'student' && !formData.studentId.trim())
+      newErrors.studentId = 'Student ID is required';
+
+    if (activeTab === 'staff' && !formData.staffId.trim())
+      newErrors.staffId = 'Staff ID is required';
+
+    const email = formData.email.trim();
+    if (!email) newErrors.email = 'Email is required';
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
       newErrors.email = 'Please enter a valid institutional email address';
-    } else if (!formData.email.endsWith('@cit.edu')) {
+    else if (!email.endsWith('@cit.edu'))
       newErrors.email = 'Please use your CIT institutional email (@cit.edu)';
-    }
 
     if (!formData.phoneNumber.trim()) newErrors.phoneNumber = 'Phone number is required';
     if (!formData.address.trim()) newErrors.address = 'Address is required';
-    
-    if (!formData.password) {
-      newErrors.password = 'Password is required';
-    } else if (formData.password.length < 6) {
-      newErrors.password = 'Password must be at least 6 characters';
-    }
 
-    if (!formData.confirmPassword) {
-      newErrors.confirmPassword = 'Please confirm your password';
-    } else if (formData.password !== formData.confirmPassword) {
+    if (!formData.password) newErrors.password = 'Password is required';
+    else if (formData.password.length < 6)
+      newErrors.password = 'Password must be at least 6 characters';
+
+    if (!formData.confirmPassword) newErrors.confirmPassword = 'Please confirm your password';
+    else if (formData.password !== formData.confirmPassword)
       newErrors.confirmPassword = 'Passwords do not match';
-    }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -165,32 +126,13 @@ const SignUp = ({ setUser }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    if (!validateForm()) {
-      return;
-    }
+    if (!validateForm()) return;
 
     setLoading(true);
     setMessage('');
 
     try {
-      // Check if account already exists
-      const { data: existingUser, error: checkError } = await supabase
-        .from('users')
-        .select('email, student_id, staff_id')
-        .or(`email.eq.${formData.email},student_id.eq.${formData.studentId || 'null'},staff_id.eq.${formData.staffId || 'null'}`);
-
-      if (checkError && checkError.code !== 'PGRST116') {
-        throw checkError;
-      }
-
-      if (existingUser && existingUser.length > 0) {
-        setMessage('❌ Account already exists. Please log in instead.');
-        setLoading(false);
-        return;
-      }
-
-      // Create account with Supabase Auth
+      // Sign up with Supabase Auth (source of truth for duplicates)
       const { data, error: signUpError } = await supabase.auth.signUp({
         email: formData.email.trim(),
         password: formData.password.trim(),
@@ -207,47 +149,67 @@ const SignUp = ({ setUser }) => {
       });
 
       if (signUpError) {
-        if (signUpError.message.includes('already registered')) {
-          throw new Error('Account already exists. Please log in instead.');
+        const msg = signUpError.message?.toLowerCase() || '';
+        if (msg.includes('already registered') || msg.includes('exists')) {
+          setMessage('❌ This email is already registered. Please use the login page instead.');
+          setLoading(false);
+          return;
         }
         throw signUpError;
       }
 
-      if (data.user) {
-        // Insert additional user info
-        const { error: insertError } = await supabase
-          .from('users')
-          .insert([
-            {
-              id: data.user.id,
-              email: formData.email.trim(),
-              full_name: formData.fullName.trim(),
-              user_type: activeTab,
-              student_id: activeTab === 'student' ? formData.studentId.trim() : null,
-              staff_id: activeTab === 'staff' ? formData.staffId.trim() : null,
-              phone_number: formData.phoneNumber.trim(),
-              address: formData.address.trim()
-            }
-          ]);
+      // If email confirmation is required, session will be null — that's NORMAL
+      
 
-        if (insertError) console.log('Additional data insert error:', insertError);
+      // If autoconfirm is ON, you have a session; insert profile row now
+      if (data?.user && data.session) {
+        const { error: insertError } = await supabase.from('users').insert([
+          {
+            id: data.user.id,
+            email: formData.email.trim(),
+            full_name: formData.fullName.trim(),
+            user_type: activeTab,
+            student_id: activeTab === 'student' ? formData.studentId.trim() : null,
+            staff_id: activeTab === 'staff' ? formData.staffId.trim() : null,
+            phone_number: formData.phoneNumber.trim(),
+            address: formData.address.trim()
+    }
+  ])
 
-        // Show success message and redirect based on role
+        if (insertError) {
+          // 23505 = unique violation safeguard
+          if (insertError.code === '23505') {
+            setMessage('❌ Account with this email or ID already exists. Please login instead.');
+            setLoading(false);
+            return;
+          }
+          throw insertError;
+        }
+
+        const user = {
+          id: data.user.id,
+          email: data.user.email,
+          name: formData.fullName.trim(),
+          type: activeTab,
+          student_id: activeTab === 'student' ? formData.studentId.trim() : null,
+          staff_id: activeTab === 'staff' ? formData.staffId.trim() : null,
+          phone_number: formData.phoneNumber.trim(),
+          address: formData.address.trim()
+        };
+
+        setUser(user);
+        localStorage.setItem('user', JSON.stringify(user));
+
         const userRole = activeTab === 'student' ? 'Student' : 'Admin';
         setMessage(`✅ Registration Successful! Welcome to CIT Wildcats ${userRole} portal.`);
-        
-        // Auto-redirect after 2 seconds
+
         setTimeout(() => {
-          if (activeTab === 'student') {
-            navigate('/student-dashboard');
-          } else {
-            navigate('/admin-dashboard');
-          }
+          navigate(activeTab === 'student' ? '/student-dashboard' : '/admin-dashboard');
         }, 2000);
       }
-    } catch (error) {
-      console.error('Registration error:', error);
-      setMessage(`❌ ${error.message}`);
+    } catch (err) {
+      console.error('Registration error:', err);
+      setMessage('❌ Registration failed. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -277,18 +239,20 @@ const SignUp = ({ setUser }) => {
       <div className="auth-left">
         <div className="auth-form-container">
           <h2 className="auth-title">Use CIT Shop Now!</h2>
-          
+
           {/* Student/Staff Tabs */}
           <div className="tab-buttons">
-            <button 
+            <button
+              type="button"
               className={`tab-btn ${activeTab === 'student' ? 'active' : ''}`}
-              onClick={() => {setActiveTab('student'); setErrors({});}}
+              onClick={() => { setActiveTab('student'); setErrors({}); }}
             >
               Student
             </button>
-            <button 
+            <button
+              type="button"
               className={`tab-btn ${activeTab === 'staff' ? 'active' : ''}`}
-              onClick={() => {setActiveTab('staff'); setErrors({});}}
+              onClick={() => { setActiveTab('staff'); setErrors({}); }}
             >
               Admin
             </button>

@@ -1,16 +1,18 @@
-// src/App.jsx - MODIFIED VERSION
+// src/App.jsx - FINAL CLEAN VERSION
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { supabase } from './lib/supabaseClient';
 import Login from './components/login';
 import SignUp from './components/signup';
 import ForgotPassword from './components/forgotpassword';
+import StudentDashboard from './components/studentdashboard';
+import AdminDashboard from './components/admindashboard';
 import './App.css';
 
 function App() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [isPasswordReset, setIsPasswordReset] = useState(false); // ← ADD THIS FLAG
+  const [isPasswordReset, setIsPasswordReset] = useState(false);
 
   useEffect(() => {
     // Get initial session
@@ -33,7 +35,7 @@ function App() {
       async (event, session) => {
         console.log('Auth event:', event); // Debug log
         
-        // ✅ HANDLE PASSWORD RECOVERY EVENT
+        // Handle password recovery event
         if (event === 'PASSWORD_RECOVERY') {
           console.log('Password recovery detected - setting flag');
           setIsPasswordReset(true); // Set flag to prevent dashboard redirect
@@ -48,7 +50,7 @@ function App() {
             type: session.user.user_metadata?.user_type || 'student'
           };
           
-          // ✅ ONLY SET USER IF NOT IN PASSWORD RESET FLOW
+          // Only set user if not in password reset flow
           if (!isPasswordReset) {
             setUser(user);
             localStorage.setItem('user', JSON.stringify(user));
@@ -72,111 +74,6 @@ function App() {
     localStorage.setItem('user', JSON.stringify(updatedUser));
   };
 
-  // Student Dashboard Component (INLINE)
-  const StudentDashboard = () => (
-    <div style={{ 
-      padding: '40px', 
-      textAlign: 'center',
-      minHeight: '100vh',
-      background: 'linear-gradient(135deg, #800000 0%, #5a0722 100%)'
-    }}>
-      <h1 style={{color: '#FFD700'}}>🐱 Student Wildcat Dashboard</h1>
-      <h2 style={{color: 'white'}}>Hello, {user?.name}!</h2>
-      <p style={{color: '#FFD700'}}>Student ID: <strong>{user?.student_id || 'N/A'}</strong></p>
-      <p style={{color: 'white'}}>Welcome to your student portal!</p>
-      
-      <button 
-        onClick={async () => {
-          await supabase.auth.signOut();
-          setUser(null);
-        }}
-        style={{
-          padding: '12px 24px',
-          background: '#FFD700',
-          color: '#800000',
-          border: '2px solid #800000',
-          borderRadius: '8px',
-          cursor: 'pointer',
-          fontSize: '16px',
-          marginTop: '20px',
-          fontWeight: 'bold'
-        }}
-      >
-        Logout
-      </button>
-    </div>
-  );
-
-  // Admin Dashboard Component (INLINE)
-  const AdminDashboard = () => (
-    <div style={{ 
-      padding: '40px', 
-      textAlign: 'center',
-      minHeight: '100vh',
-      background: 'linear-gradient(135deg, #FFD700 0%, #B8860B 100%)'
-    }}>
-      <h1 style={{color: '#800000'}}>👑 Admin Wildcat Dashboard</h1>
-      <h2 style={{color: '#5a0722'}}>Hello, {user?.name}!</h2>
-      <p style={{color: '#800000'}}>Staff ID: <strong>{user?.staff_id || 'N/A'}</strong></p>
-      <p style={{color: '#5a0722'}}>Welcome to your admin control panel!</p>
-      
-      <button 
-        onClick={async () => {
-          await supabase.auth.signOut();
-          setUser(null);
-        }}
-        style={{
-          padding: '12px 24px',
-          background: '#800000',
-          color: '#FFD700',
-          border: '2px solid #FFD700',
-          borderRadius: '8px',
-          cursor: 'pointer',
-          fontSize: '16px',
-          marginTop: '20px',
-          fontWeight: 'bold'
-        }}
-      >
-        Logout
-      </button>
-    </div>
-  );
-
-  // Generic Dashboard (INLINE)
-  const Dashboard = () => (
-    <div style={{ 
-      padding: '40px', 
-      textAlign: 'center',
-      minHeight: '100vh',
-      background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)'
-    }}>
-      <h1>Welcome to CIT Wildcats Store!</h1>
-      <h2>Hello, {user?.name}! 👋</h2>
-      <p>Account type: <strong>{user?.type}</strong></p>
-      <p>Email: <strong>{user?.email}</strong></p>
-      <p>This is your reservation portal.</p>
-      
-      <button 
-        onClick={async () => {
-          await supabase.auth.signOut();
-          setUser(null);
-        }}
-        style={{
-          padding: '12px 24px',
-          background: '#800000',
-          color: '#FFD700',
-          border: '2px solid #FFD700',
-          borderRadius: '8px',
-          cursor: 'pointer',
-          fontSize: '16px',
-          marginTop: '20px'
-        }}
-      >
-        Logout
-      </button>
-    </div>
-  );
-
   if (loading) {
     return (
       <div style={{ 
@@ -194,40 +91,55 @@ function App() {
     <Router>
       <div className="App">
         <Routes>
+          {/* Login Route - Fixed to redirect to role-based dashboards */}
           <Route 
             path="/login" 
-            element={user ? <Navigate to="/dashboard" /> : <Login setUser={setUser} />} 
+            element={user ? (
+              <Navigate to={user.type === 'student' ? '/student-dashboard' : '/admin-dashboard'} />
+            ) : <Login setUser={setUser} />} 
           />
+          
+          {/* Signup Route - Fixed to redirect to role-based dashboards */}
           <Route 
             path="/signup" 
-            element={user ? <Navigate to="/dashboard" /> : <SignUp setUser={setUser} />} 
+            element={user ? (
+              <Navigate to={user.type === 'student' ? '/student-dashboard' : '/admin-dashboard'} />
+            ) : <SignUp setUser={setUser} />} 
           />
+          
+          {/* Forgot Password Route */}
           <Route 
             path="/forgot-password" 
             element={
               user && !isPasswordReset 
-                ? <Navigate to="/dashboard" /> 
+                ? <Navigate to={user.type === 'student' ? '/student-dashboard' : '/admin-dashboard'} />
                 : <ForgotPassword 
                     isPasswordReset={isPasswordReset} 
                     onPasswordResetComplete={handlePasswordResetComplete}
                   />
             }  
           />
+          
+          {/* Student Dashboard Route */}
           <Route 
             path="/student-dashboard" 
-            element={user ? <StudentDashboard /> : <Navigate to="/login" />} 
+            element={user ? <StudentDashboard user={user} setUser={setUser} /> : <Navigate to="/login" />} 
           />
+          
+          {/* Admin Dashboard Route */}
           <Route 
             path="/admin-dashboard" 
-            element={user ? <AdminDashboard /> : <Navigate to="/login" />} 
+            element={user ? <AdminDashboard user={user} setUser={setUser} /> : <Navigate to="/login" />} 
           />
-          <Route 
-            path="/dashboard" 
-            element={user ? <Dashboard /> : <Navigate to="/login" />} 
-          />
+          
+          {/* Default Route - Fixed to redirect to role-based dashboards */}
           <Route 
             path="/" 
-            element={<Navigate to={user ? "/dashboard" : "/login"} />} 
+            element={
+              <Navigate to={user ? (
+                user.type === 'student' ? '/student-dashboard' : '/admin-dashboard'
+              ) : '/login'} />
+            } 
           />
         </Routes>
       </div>
