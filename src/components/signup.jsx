@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabaseClient';
-import './Auth.css';
+import './auth.css';
 
 const SignUp = ({ setUser }) => {
   const [activeTab, setActiveTab] = useState('student'); // 'student' or 'staff'
