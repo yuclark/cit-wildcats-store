@@ -1,7 +1,7 @@
 // src/components/AdminDashboard.jsx - PROFESSIONAL ADMIN DASHBOARD
 import React, { useState } from 'react';
 import { supabase } from '../lib/supabaseClient';
-import './AdminDashboard.css';
+import './admindashboard.css';
 
 const AdminDashboard = ({ user, setUser }) => {
   const [activeTab, setActiveTab] = useState('admin-dashboard');
