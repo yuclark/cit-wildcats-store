@@ -1,8 +1,8 @@
 // src/components/StudentDashboard.jsx - ADD PROFILE FUNCTIONALITY
 import React, { useState } from 'react';
 import { supabase } from '../lib/supabaseClient';
-import StudentProfile from './StudentProfile'; // ← ADD THIS IMPORT
-import './StudentDashboard.css';
+import StudentProfile from './studentprofile'; // ← ADD THIS IMPORT
+import './studentdashboard.css';
 
 const StudentDashboard = ({ user, setUser }) => {
   const [activeTab, setActiveTab] = useState('dashboard');
