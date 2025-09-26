@@ -323,7 +323,7 @@ const SignUp = ({ setUser }) => {
                 <input
                   type="text"
                   name="studentId"
-                  placeholder="2023-12345"
+                  placeholder="12-1234-123"
                   value={formData.studentId}
                   onChange={handleChange}
                   onBlur={handleBlur}
@@ -337,7 +337,7 @@ const SignUp = ({ setUser }) => {
                 <input
                   type="text"
                   name="staffId"
-                  placeholder="STF-2023-001"
+                  placeholder="1234"
                   value={formData.staffId}
                   onChange={handleChange}
                   onBlur={handleBlur}
