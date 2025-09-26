@@ -89,8 +89,8 @@ const StudentDashboard = ({ user, setUser }) => {
       {/* Rest of your existing dashboard content... */}
       <main className="dashboard-main">
         <div className="container">
-          <h1 className="welcome-title">Welcome back, {user?.name?.split(' ')[0] || 'Wildcat'}! 👋</h1>
-          <p className="welcome-subtitle">Manage your reservations and orders with ease</p>
+          <h1 className="welcome-title">Welcome, {user?.name?.split(' ')[0] || 'Wildcat'}! 👋</h1>
+          
 
           <div className="dashboard-grid">
             {/* Browse Products Card */}
