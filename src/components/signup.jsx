@@ -290,7 +290,7 @@ const SignUp = ({ setUser }) => {
               className={`tab-btn ${activeTab === 'staff' ? 'active' : ''}`}
               onClick={() => {setActiveTab('staff'); setErrors({});}}
             >
-              Staff
+              Admin
             </button>
           </div>
 
