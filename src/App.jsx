@@ -194,14 +194,11 @@ function App() {
     <Router>
       <div className="App">
         <Routes>
-          <Route 
-            path="/login" 
-            element={user ? <Navigate to="/dashboard" /> : <Login setUser={setUser} />} 
-          />
+          
           <Route 
             path="/signup" 
             element={user ? <Navigate to="/dashboard" /> : <SignUp setUser={setUser} />} 
-          />
+          /> 
           <Route 
             path="/forgot-password" 
             element={
