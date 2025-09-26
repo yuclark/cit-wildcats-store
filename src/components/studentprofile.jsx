@@ -1,7 +1,7 @@
 // src/components/StudentProfile.jsx - BUYER PROFILE PAGE
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabaseClient';
-import './StudentProfile.css';
+import './studentprofile.css';
 
 const StudentProfile = ({ user, setUser, onBack }) => {
   const [profileData, setProfileData] = useState({
