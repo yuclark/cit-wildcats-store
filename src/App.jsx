@@ -196,10 +196,6 @@ function App() {
         <Routes>
           
           <Route 
-            path="/signup" 
-            element={user ? <Navigate to="/dashboard" /> : <SignUp setUser={setUser} />} 
-          />
-          <Route 
             path="/forgot-password" 
             element={
               user && !isPasswordReset 
