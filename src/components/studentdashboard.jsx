@@ -16,7 +16,7 @@ const StudentDashboard = ({ user, setUser }) => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const API_BASE_URL = 'http://127.0.0.1:8000/api';
+const API_BASE_URL = import.meta.env.VITE_BACKEND_URL || 'http://127.0.0.1:8000/api';
 
   // ✅ FETCH REAL RESERVATIONS AND ORDERS
   const fetchOrdersAndReservations = async () => {
