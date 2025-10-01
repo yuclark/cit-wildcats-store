@@ -1,6 +1,6 @@
 // src/components/BrowseProducts.jsx - COMPLETE WITH HORIZONTAL FILTERS
 import React, { useState, useEffect } from 'react';
-import './BrowseProducts.css';
+import './browseproducts.css';
 
 const BrowseProducts = ({ user, onBack, onNavigateToReservations }) => {
   const [products, setProducts] = useState([]);
