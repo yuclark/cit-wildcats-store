@@ -22,7 +22,7 @@ const ForgotPassword = ({ isPasswordReset, onPasswordResetComplete }) => {
     if (isPasswordReset) {
       console.log('Password reset mode detected - jumping to step 3');
       setStep(3);
-      setMessage('✅ OTP is verified! Now set your new password.');
+      setMessage('✅ OTP is verified! Please set your new password.');
     }
   }, [isPasswordReset]);
 
