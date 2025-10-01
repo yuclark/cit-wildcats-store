@@ -4,7 +4,7 @@ import { supabase } from '../lib/supabaseClient';
 import StudentProfile from './studentprofile';
 import BrowseProducts from './browseproducts';
 import MyReservations from './myreservations';
-import './studentdashboard.css';
+import StudentDashboard from './studentdashboard.css';
 
 
 const StudentDashboard = ({ user, setUser }) => {
