@@ -497,5 +497,5 @@ html, body {
 /* Placeholder should be gray, not white */
 .form-group input::placeholder {
   color: #666 !important;
-  opacity: 1 !important;
+  opacity: 0.4 !important;
 }

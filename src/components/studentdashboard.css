@@ -275,4 +275,125 @@
   .dashboard-main {
     padding: 1rem;
   }
+
+  /* Add these new styles to your existing StudentDashboard.css */
+
+/* ✅ NEW STYLES FOR REAL DATA */
+.loading-item {
+  padding: 12px 0;
+  text-align: center;
+  color: #800000;
+  font-style: italic;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 2rem 0;
+  color: #64748b;
+}
+
+.empty-state span {
+  font-size: 18px;
+  display: block;
+  margin-bottom: 8px;
+}
+
+.empty-state p {
+  font-size: 14px;
+  margin: 0;
+  font-style: italic;
+}
+
+.item-details {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+
+.item-order-number {
+  font-family: 'Courier New', monospace;
+  font-size: 12px;
+  color: #800000;
+  font-weight: 600;
+}
+
+.item-amount {
+  color: #059669;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+/* ✅ UPDATE EXISTING ACTIVITY ITEM STYLES */
+.activity-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid #f1f5f9;
+  gap: 12px;
+}
+
+.activity-item:last-child {
+  border-bottom: none;
+}
+
+.item-name {
+  font-weight: 500;
+  color: #1e293b;
+  font-size: 15px;
+}
+
+.item-date {
+  color: #64748b;
+  font-size: 13px;
+  min-width: 80px;
+  text-align: center;
+}
+
+/* ✅ UPDATE STATUS STYLES */
+.item-status.pending {
+  background: #fef3c7;
+  color: #92400e;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  min-width: 70px;
+  text-align: center;
+}
+
+.item-status.approved {
+  background: #dcfce7;
+  color: #166534;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  min-width: 70px;
+  text-align: center;
+}
+
+.item-status.released {
+  background: #dbeafe;
+  color: #1e40af;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  min-width: 70px;
+  text-align: center;
+}
+
+.item-status.cancelled {
+  background: #fee2e2;
+  color: #991b1b;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  min-width: 70px;
+  text-align: center;
+}
+
 }

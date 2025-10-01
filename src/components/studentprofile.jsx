@@ -1,4 +1,4 @@
-// src/components/StudentProfile.jsx - BUYER PROFILE PAGE
+// src/components/StudentProfile.jsx - FIXED WITH CORRECT SUPABASE FIELDS
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import './studentprofile.css';
@@ -15,16 +15,45 @@ const StudentProfile = ({ user, setUser, onBack }) => {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
 
-  useEffect(() => {
-    if (user) {
+  // ✅ FETCH FRESH USER DATA WITH CORRECT FIELD NAMES
+  const fetchUserProfile = async () => {
+    if (!user?.id) return;
+
+    try {
+      const { data, error } = await supabase
+        .from('users')
+        .select('email, student_id, full_name, phone_number, address, user_type, staff_id')
+        .eq('id', user.id)
+        .single();
+
+      if (error) throw error;
+
+      console.log('✅ Fresh user data from Supabase:', data);
+
+      // ✅ MAP TO EXACT SUPABASE FIELD NAMES
       setProfileData({
-        full_name: user.name || '',
+        full_name: data.full_name || '',
+        student_id: data.student_id || '',
+        email: data.email || '',
+        phone_number: data.phone_number || '',
+        address: data.address || ''
+      });
+
+    } catch (error) {
+      console.error('❌ Error fetching user profile:', error);
+      // ✅ FALLBACK TO USER OBJECT IF SUPABASE FAILS
+      setProfileData({
+        full_name: user.full_name || user.name || '',
         student_id: user.student_id || '',
         email: user.email || '',
         phone_number: user.phone_number || '',
         address: user.address || ''
       });
     }
+  };
+
+  useEffect(() => {
+    fetchUserProfile();
   }, [user]);
 
   const handleInputChange = (e) => {
@@ -40,24 +69,29 @@ const StudentProfile = ({ user, setUser, onBack }) => {
     setMessage('');
 
     try {
-      // Update user data in custom users table
-      const { error: updateError } = await supabase
+      // ✅ UPDATE WITH EXACT SUPABASE FIELD NAMES
+      const { data, error: updateError } = await supabase
         .from('users')
         .update({
           full_name: profileData.full_name,
           phone_number: profileData.phone_number,
           address: profileData.address
+          // Note: email and student_id are read-only
         })
-        .eq('id', user.id);
+        .eq('id', user.id)
+        .select();
 
       if (updateError) {
         throw updateError;
       }
 
-      // Update user object in app state
+      console.log('✅ Updated user data:', data);
+
+      // ✅ UPDATE USER OBJECT IN STATE
       const updatedUser = {
         ...user,
-        name: profileData.full_name,
+        full_name: profileData.full_name,
+        name: profileData.full_name, // Keep both for compatibility
         phone_number: profileData.phone_number,
         address: profileData.address
       };
@@ -70,7 +104,7 @@ const StudentProfile = ({ user, setUser, onBack }) => {
 
       setTimeout(() => setMessage(''), 3000);
     } catch (error) {
-      console.error('Profile update error:', error);
+      console.error('❌ Profile update error:', error);
       setMessage('❌ Failed to update profile. Please try again.');
     } finally {
       setLoading(false);
@@ -78,14 +112,8 @@ const StudentProfile = ({ user, setUser, onBack }) => {
   };
 
   const handleCancel = () => {
-    // Reset to original user data
-    setProfileData({
-      full_name: user.name || '',
-      student_id: user.student_id || '',
-      email: user.email || '',
-      phone_number: user.phone_number || '',
-      address: user.address || ''
-    });
+    // ✅ RESET TO FRESH DATA FROM SUPABASE
+    fetchUserProfile();
     setIsEditing(false);
     setMessage('');
   };
@@ -100,23 +128,18 @@ const StudentProfile = ({ user, setUser, onBack }) => {
           </button>
           <div className="logo">
             <span className="logo-icon">🐱</span>
-            <span className="logo-text">Browse Products</span>
-            <span className="logo-text">My Reservations</span>
-            <span className="logo-text">My Orders</span>
+            <span className="logo-text">CIT Wildcats Profile</span>
           </div>
         </div>
 
         <div className="header-right">
-          <div className="search-icon">🔍</div>
-          <div className="user-icon">👤</div>
-          <div className="profile-avatar">O</div>
+          <span className="user-welcome">Welcome, {profileData.full_name?.split(' ')[0] || 'Wildcat'}! 🐱</span>
         </div>
       </header>
 
       {/* Main Content */}
       <main className="profile-main">
         <div className="container">
-          {/* Profile Section */}
           <div className="profile-section">
             <div className="profile-title-row">
               <h1>My Profile</h1>
@@ -157,9 +180,9 @@ const StudentProfile = ({ user, setUser, onBack }) => {
             <div className="profile-avatar-section">
               <div className="avatar-container">
                 <div className="avatar-circle">
-                  <svg className="user-icon" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
-                  </svg>
+                  <span className="avatar-text">
+                    {profileData.full_name ? profileData.full_name.charAt(0).toUpperCase() : '🐱'}
+                  </span>
                 </div>
                 <div className="status-dot"></div>
               </div>
@@ -178,18 +201,20 @@ const StudentProfile = ({ user, setUser, onBack }) => {
                     onChange={handleInputChange}
                     disabled={!isEditing}
                     className={!isEditing ? 'readonly' : ''}
+                    placeholder={!profileData.full_name ? "Full name not set" : ""}
                   />
                 </div>
 
-                {/* Student ID */}
+                {/* Student ID - Read Only */}
                 <div className="form-group">
                   <label>Student ID</label>
                   <input
                     type="text"
                     name="student_id"
-                    value={profileData.student_id}
+                    value={profileData.student_id || 'Not set'}
                     disabled={true}
                     className="readonly"
+                    title="Student ID cannot be changed"
                   />
                 </div>
 
@@ -203,18 +228,20 @@ const StudentProfile = ({ user, setUser, onBack }) => {
                     onChange={handleInputChange}
                     disabled={!isEditing}
                     className={!isEditing ? 'readonly' : ''}
+                    placeholder={!profileData.phone_number ? "Phone number not set" : ""}
                   />
                 </div>
 
-                {/* Email Address */}
+                {/* Email Address - Read Only */}
                 <div className="form-group">
                   <label>Email Address</label>
                   <input
                     type="email"
                     name="email"
-                    value={profileData.email}
+                    value={profileData.email || 'Not set'}
                     disabled={true}
                     className="readonly"
+                    title="Email cannot be changed"
                   />
                 </div>
 
@@ -228,6 +255,7 @@ const StudentProfile = ({ user, setUser, onBack }) => {
                     onChange={handleInputChange}
                     disabled={!isEditing}
                     className={!isEditing ? 'readonly' : ''}
+                    placeholder={!profileData.address ? "Address not set" : ""}
                   />
                 </div>
               </div>

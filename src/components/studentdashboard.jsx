@@ -1,19 +1,91 @@
-// src/components/StudentDashboard.jsx - ADD PROFILE FUNCTIONALITY
-import React, { useState } from 'react';
+// src/components/StudentDashboard.jsx - UPDATED WITH REAL RESERVATIONS/ORDERS
+import React, { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabaseClient';
-import StudentProfile from './studentprofile'; // ← ADD THIS IMPORT
-import './studentdashboard.css';
+import StudentProfile from './studentprofile';
+import BrowseProducts from './browseproducts';
+import MyReservations from './myreservations';
+import './StudentDashboard.css';
+
 
 const StudentDashboard = ({ user, setUser }) => {
   const [activeTab, setActiveTab] = useState('dashboard');
-  const [showProfile, setShowProfile] = useState(false); // ← ADD THIS STATE
+  const [showProfile, setShowProfile] = useState(false);
+  
+  // ✅ NEW STATES FOR REAL DATA
+  const [reservations, setReservations] = useState([]);
+  const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const API_BASE_URL = 'http://127.0.0.1:8000/api';
+
+  // ✅ FETCH REAL RESERVATIONS AND ORDERS
+  const fetchOrdersAndReservations = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch(`${API_BASE_URL}/orders/`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        
+        // ✅ SEPARATE RESERVATIONS AND ORDERS
+        const allReservations = data.filter(item => item.order_type === 'reservation');
+        const allOrders = data.filter(item => item.order_type === 'order');
+        
+        setReservations(allReservations);
+        setOrders(allOrders);
+      } else {
+        console.error('Failed to fetch orders:', response.status);
+      }
+    } catch (error) {
+      console.error('Error fetching orders:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // ✅ FETCH DATA ON COMPONENT MOUNT
+  useEffect(() => {
+    fetchOrdersAndReservations();
+  }, []);
+
+  // ✅ REFRESH DATA WHEN COMING BACK TO DASHBOARD
+  useEffect(() => {
+    if (activeTab === 'dashboard') {
+      fetchOrdersAndReservations();
+    }
+  }, [activeTab]);
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
     setUser(null);
   };
 
-  // ✅ ADD THIS: Show Profile component when showProfile is true
+  // Show Browse Products when browse tab is active
+  if (activeTab === 'browse') {
+  return (
+    <BrowseProducts 
+      user={user} 
+      onBack={() => setActiveTab('dashboard')}
+      onNavigateToReservations={() => setActiveTab('reservations')} // ✅ ADD THIS
+    />
+  );
+}
+  //show diri ang myreservations
+  if (activeTab === 'reservations') {
+  return (
+    <MyReservations 
+      user={user} 
+      onBack={() => setActiveTab('dashboard')} 
+    />
+  );
+}
+
+  // Show Profile component when showProfile is true
   if (showProfile) {
     return (
       <StudentProfile 
@@ -23,17 +95,6 @@ const StudentDashboard = ({ user, setUser }) => {
       />
     );
   }
-
-  const mockReservations = [
-    { id: 1, item: 'Yellow Pad', date: '25/05/2025', status: 'confirmed' },
-    { id: 2, item: 'Yellow Pad', date: '25/05/2025', status: 'pending' },
-    { id: 3, item: 'Yellow Pad', date: '25/05/2025', status: 'pending' }
-  ];
-
-  const mockOrders = [
-    { id: 1, item: 'Yellow Pad', date: '25/05/2025', quantity: 'Qty: 1' },
-    { id: 2, item: 'Yellow Pad', date: '25/05/2025', quantity: 'Qty: 1' }
-  ];
 
   return (
     <div className="buyer-dashboard">
@@ -74,11 +135,11 @@ const StudentDashboard = ({ user, setUser }) => {
           </button>
         </nav>
 
-        {/* Profile Section - ✅ UPDATE THIS PART */}
+        {/* Profile Section */}
         <div className="header-right">
           <button 
             className="profile-btn"
-            onClick={() => setShowProfile(true)} // ← ADD THIS CLICK HANDLER
+            onClick={() => setShowProfile(true)}
           >
             Profile
           </button>
@@ -86,19 +147,23 @@ const StudentDashboard = ({ user, setUser }) => {
         </div>
       </header>
 
-      {/* Rest of your existing dashboard content... */}
+      {/* Main Dashboard Content */}
       <main className="dashboard-main">
         <div className="container">
           <h1 className="welcome-title">Welcome, {user?.name?.split(' ')[0] || 'Wildcat'}! 👋</h1>
           
-
           <div className="dashboard-grid">
             {/* Browse Products Card */}
             <div className="dashboard-card">
               <div className="card-icon">🛍️</div>
               <h2>Browse Products</h2>
               <p>Explore our wide selection of school supplies and items</p>
-              <button className="card-btn">View Products</button>
+              <button 
+                className="card-btn"
+                onClick={() => setActiveTab('browse')}
+              >
+                View Products
+              </button>
             </div>
 
             {/* My Reservations Card */}
@@ -106,40 +171,119 @@ const StudentDashboard = ({ user, setUser }) => {
               <div className="card-icon">📋</div>
               <h2>My Reservations</h2>
               <p>Check your current and past reservations</p>
-              <button className="card-btn">View Reservations</button>
+              <button 
+                className="card-btn"
+                onClick={() => setActiveTab('reservations')}
+              >
+                View Reservations
+              </button>
             </div>
           </div>
 
-          {/* Recent Activity */}
+          {/* ✅ REAL RECENT ACTIVITY */}
           <div className="activity-section">
             <div className="activity-left">
-              <h3>Reservations <span className="count">{mockReservations.length} upcoming</span></h3>
+              <h3>
+                Reservations 
+                <span className="count">
+                  {loading ? '...' : `${reservations.length} total`}
+                </span>
+              </h3>
+              
               <div className="activity-list">
-                {mockReservations.map(item => (
-                  <div key={item.id} className="activity-item">
-                    <span className="item-name">{item.item}</span>
-                    <span className="item-date">{item.date}</span>
-                    <span className={`item-status ${item.status}`}>
-                      {item.status === 'confirmed' ? 'Confirmed' : 'Pending'}
-                    </span>
+                {loading ? (
+                  <div className="loading-item">
+                    <span>🐱 Loading reservations...</span>
                   </div>
-                ))}
+                ) : reservations.length === 0 ? (
+                  <div className="empty-state">
+                    <span>📋 No reservations yet</span>
+                    <p>Reserve some items to see them here!</p>
+                  </div>
+                ) : (
+                  reservations.slice(0, 3).map(reservation => (
+                    <div key={reservation.id} className="activity-item">
+                      <div className="item-details">
+                        <span className="item-name">
+                          {reservation.items?.[0]?.product_name || 'Product'}
+                        </span>
+                        <span className="item-order-number">
+                          #{reservation.order_number}
+                        </span>
+                      </div>
+                      <span className="item-date">
+                        {new Date(reservation.created_at).toLocaleDateString('en-US', {
+                          month: '2-digit',
+                          day: '2-digit', 
+                          year: 'numeric'
+                        })}
+                      </span>
+                      <span className={`item-status ${reservation.status}`}>
+                        {reservation.status.charAt(0).toUpperCase() + reservation.status.slice(1)}
+                      </span>
+                    </div>
+                  ))
+                )}
               </div>
-              <button className="view-all-btn">View All Reservations</button>
+              
+              <button 
+                className="view-all-btn"
+                onClick={() => setActiveTab('reservations')}
+              >
+                View All Reservations
+              </button>
             </div>
 
             <div className="activity-right">
-              <h3>Orders <span className="count">{mockOrders.length} in progress</span></h3>
+              <h3>
+                Orders 
+                <span className="count">
+                  {loading ? '...' : `${orders.length} total`}
+                </span>
+              </h3>
+              
               <div className="activity-list">
-                {mockOrders.map(item => (
-                  <div key={item.id} className="activity-item">
-                    <span className="item-name">{item.item}</span>
-                    <span className="item-date">{item.date}</span>
-                    <span className="item-quantity">{item.quantity}</span>
+                {loading ? (
+                  <div className="loading-item">
+                    <span>🐱 Loading orders...</span>
                   </div>
-                ))}
+                ) : orders.length === 0 ? (
+                  <div className="empty-state">
+                    <span>📦 No orders yet</span>
+                    <p>Order some items to see them here!</p>
+                  </div>
+                ) : (
+                  orders.slice(0, 3).map(order => (
+                    <div key={order.id} className="activity-item">
+                      <div className="item-details">
+                        <span className="item-name">
+                          {order.items?.[0]?.product_name || 'Product'}
+                        </span>
+                        <span className="item-order-number">
+                          #{order.order_number}
+                        </span>
+                      </div>
+                      <span className="item-date">
+                        {new Date(order.created_at).toLocaleDateString('en-US', {
+                          month: '2-digit',
+                          day: '2-digit',
+                          year: 'numeric'
+                        })}
+                      </span>
+                      <span className="item-amount">
+                        ₱{parseFloat(order.total_amount).toFixed(2)}
+                      </span>
+                    </div>
+                  ))
+                )}
               </div>
-              <button className="view-all-btn">View All Orders</button>
+              
+              <button 
+                className="view-all-btn"
+                onClick={() => setActiveTab('orders')}
+              >
+                View All Orders
+              </button>
             </div>
           </div>
         </div>
