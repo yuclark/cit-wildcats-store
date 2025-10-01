@@ -1,6 +1,6 @@
 // src/components/MyReservations.jsx
 import React, { useState, useEffect } from 'react';
-import './MyReservations.css';
+import './myreservations.css';
 
 const MyReservations = ({ user, onBack }) => {
   const [reservations, setReservations] = useState([]);
